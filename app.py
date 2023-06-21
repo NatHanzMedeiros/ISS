@@ -26,7 +26,7 @@ def index():
                     var map = L.map('map').setView([0, 0], 2);
 
                     var tileLayer = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png', {
-                        maxZoom: 18,
+                        maxZoom: 100,
                         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
                             '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
                             'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -41,6 +41,10 @@ def index():
                         title: 'ISS'
                     }).addTo(map);
 
+                    var polyline = L.polyline([], {color: 'red'}).addTo(map);
+
+                    var path = [];
+
                     function updateISS() {
                         fetch('http://api.open-notify.org/iss-now.json')
                             .then(response => response.json())
@@ -49,6 +53,8 @@ def index():
                                 var lon = parseFloat(data.iss_position.longitude);
                                 marker.setLatLng([lat, lon]);
                                 map.setView([lat, lon], 3);
+                                path.push([lat, lon]);
+                                polyline.setLatLngs(path);
                             })
                             .catch(error => {
                                 console.error('Error:', error);
@@ -63,4 +69,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='127.0.0.1', port=5000)
