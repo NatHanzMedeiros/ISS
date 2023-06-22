@@ -44,6 +44,7 @@ def index():
                     var polyline = L.polyline([], {color: 'red'}).addTo(map);
 
                     var path = [];
+                    var currentZoom = 2;
 
                     function updateISS() {
                         fetch('http://api.open-notify.org/iss-now.json')
@@ -52,7 +53,7 @@ def index():
                                 var lat = parseFloat(data.iss_position.latitude);
                                 var lon = parseFloat(data.iss_position.longitude);
                                 marker.setLatLng([lat, lon]);
-                                map.setView([lat, lon], 3);
+                                map.setView([lat, lon], currentZoom);
                                 path.push([lat, lon]);
                                 polyline.setLatLngs(path);
                             })
@@ -60,6 +61,10 @@ def index():
                                 console.error('Error:', error);
                             });
                     }
+
+                    map.on('zoomend', function() { 
+                        currentZoom = map.getZoom();
+                    });
 
                     setInterval(updateISS, 50);
                 </script>
