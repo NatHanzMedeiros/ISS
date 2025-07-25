@@ -13,8 +13,8 @@ iss_data_cache = {
 
 def get_iss_data():
     try:
-        # Verifica se os dados em cache ainda são válidos (atualizados nos últimos 5 segundos)
-        if time.time() - iss_data_cache['timestamp'] < 5 and iss_data_cache['data']:
+        # Verifica se os dados em cache ainda são válidos (atualizados nos últimos 1 segundo)
+        if time.time() - iss_data_cache['timestamp'] < 0 and iss_data_cache['data']:
             return iss_data_cache['data']
         
         response = requests.get('https://api.wheretheiss.at/v1/satellites/25544', timeout=5)
@@ -157,22 +157,21 @@ def index():
                     crossorigin=""></script>
                 <script>
                     // Configurações
-                    const UPDATE_INTERVAL = 2000; // 2 segundos
+                    const UPDATE_INTERVAL = 100; // 1 segundo
                     
                     // Inicializa o mapa
                     var map = L.map('map', {
-                    minZoom: 2.5,
-                    maxZoom: 5,  // Ajuste este valor conforme necessário
-                    zoomControl: false  // Opcional: remove o controle de zoom padrão
-                }).setView([0, 0], 2);
-                    
+                        minZoom: 2.5,
+                        maxZoom: 10,
+                        zoomControl: false
+                    }).setView([0, 0], 2);
                     
                     // Usa tiles do OpenStreetMap
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 19
-}).addTo(map);
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                        subdomains: 'abcd',
+                        maxZoom: 19
+                    }).addTo(map);
 
                     // Cria o marcador da ISS
                     var marker = L.marker([0, 0], {
@@ -183,10 +182,6 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                         }),
                         title: 'ISS'
                     }).addTo(map);
-
-                    // Cria a linha do trajeto
-                    var polyline = L.polyline([], {color: '#c90808', weight: 7, opacity: 1.0}).addTo(map);
-                    var path = [];
 
                     // Função para formatar números
                     function formatNumber(num, decimals) {
@@ -240,11 +235,8 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                                 const lat = data.latitude;
                                 const lon = data.longitude;
                                 
-                                // Atualiza marcador e trajeto
+                                // Atualiza apenas o marcador
                                 marker.setLatLng([lat, lon]);
-                                path.push([lat, lon]);
-                                if (path.length > 100) path.shift(); // Limita o histórico
-                                polyline.setLatLngs(path);
                                 
                                 // Atualiza informações
                                 document.getElementById('latitude').textContent = formatNumber(lat, 4);
